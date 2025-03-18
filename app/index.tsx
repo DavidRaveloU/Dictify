@@ -22,31 +22,28 @@ export default function Home() {
         <Link href={{ pathname: '/details', params: { word: 'Run' } }} asChild>
           <Pressable>
             {({ pressed }) => (
-              <View className={`mt-7 rounded-lg bg-[#FAF6F3] p-7 ${pressed ? 'opacity-50' : ''}`}>
-                <View className="flex-row items-center gap-2">
-                  <Text className="text-4xl font-bold">Run</Text>
-                  <Text className="text-[#999]">Verb</Text>
+              <View
+                className={`center mt-7 flex-row rounded-lg bg-[#FAF6F3] p-7 ${pressed ? 'opacity-50' : ''}`}>
+                <View className="flex-col">
+                  <View className="flex-row items-center gap-2">
+                    <View className="h-7 w-2 bg-[#2563eb]" />
+                    <Text className="text-4xl font-bold">Run</Text>
+                    <Text className="text-[#999]">Verb</Text>
+                  </View>
+                  <View className="flex-row items-center gap-3">
+                    <Text className="text-xl italic text-[#999]">/həˈləʊ/</Text>
+                    <Ionicons name="volume-high" size={24} color="#999" />
+                  </View>
+                  <Text>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elitipsum dolor sit amet,
+                    consectetur adipiscing elit
+                  </Text>
                 </View>
-                <View className="flex-row items-center gap-3">
-                  <Text className="text-xl italic text-[#999]">/həˈləʊ/</Text>
-                  <Ionicons name="volume-high" size={24} color="#999" />
-                </View>
-                <Text>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elitipsum dolor sit amet,
-                  consectetur adipiscing elit
-                </Text>
               </View>
             )}
           </Pressable>
         </Link>
       </View>
-
-      {/* <Container>
-        <ScreenContent path="app/index.tsx" title="Home" />
-        <Link href={{ pathname: '/details', params: { name: 'Dan' } }} asChild>
-          <Button title="Show Details" />
-        </Link>
-      </Container> */}
     </>
   );
 }
