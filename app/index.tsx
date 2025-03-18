@@ -19,7 +19,7 @@ export default function Home() {
             placeholderTextColor="#999"
           />
         </View>
-        <Link href={{ pathname: '/details', params: { name: 'Run' } }} asChild>
+        <Link href={{ pathname: '/details', params: { word: 'Run' } }} asChild>
           <Pressable>
             {({ pressed }) => (
               <View className={`mt-7 rounded-lg bg-[#FAF6F3] p-7 ${pressed ? 'opacity-50' : ''}`}>
