@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
@@ -11,6 +12,10 @@ export default function Details() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(0);
   const [groupedMeanings, setGroupedMeanings] = useState<{ [key: string]: Meaning[] }>({});
+  const [selectedPhonetic, setSelectedPhonetic] = useState<{
+    text?: string;
+    audio?: string;
+  } | null>(null);
 
   useEffect(() => {
     const getWordDetails = async () => {
@@ -29,6 +34,23 @@ export default function Details() {
             {} as { [key: string]: Meaning[] }
           );
           setGroupedMeanings(grouped);
+          const phonetics = details.phonetics || [];
+          const firstWithAudio = phonetics.find((p) => p.audio);
+          const firstWithText = phonetics.find((p) => p.text);
+
+          if (firstWithAudio) {
+            setSelectedPhonetic({
+              text: firstWithAudio.text || firstWithText?.text || '',
+              audio: firstWithAudio.audio,
+            });
+          } else if (firstWithText) {
+            setSelectedPhonetic({
+              text: firstWithText.text,
+              audio: '',
+            });
+          } else {
+            setSelectedPhonetic(null);
+          }
         }
       }
       setLoading(false);
@@ -45,72 +67,60 @@ export default function Details() {
     return <Text>Word not found.</Text>;
   }
 
-  const selectedPhonetic = (() => {
-    const phonetics = wordDetails.phonetics || [];
-
-    // Buscar el último phonetic con audio
-    const lastWithAudio = phonetics.reverse().find((p) => p.audio);
-    if (lastWithAudio) return lastWithAudio;
-
-    // Buscar el primer phonetic con audio
-    const firstWithAudio = phonetics.find((p) => p.audio);
-    if (firstWithAudio) return firstWithAudio;
-
-    // Buscar el primer phonetic con texto
-    const firstWithText = phonetics.find((p) => p.text);
-    if (firstWithText) return firstWithText;
-
-    return null;
-  })();
-
   const partOfSpeechTabs = Object.keys(groupedMeanings);
 
   return (
     <>
       <Stack.Screen
         options={{
-          title: wordDetails.word,
+          title: 'Back',
           headerShown: true,
+          headerTintColor: '#2563eb',
+          headerStyle: { backgroundColor: '#f9f9f9' },
         }}
       />
-      <View className="flex-1">
-        <Text className="text-xl font-semibold text-[#1F1F1F]">{wordDetails.word}</Text>
-        {selectedPhonetic?.text && (
-          <Text className="text-lg italic text-[#999]">{selectedPhonetic.text}</Text>
-        )}
+      <View className="mt-5 flex-1 px-6">
+        <Text className="text-5xl font-semibold text-[#1F1F1F]">
+          {wordDetails.word.charAt(0).toUpperCase() + wordDetails.word.slice(1)}
+        </Text>
+        <View className="mb-3 flex-row items-center gap-2">
+          {selectedPhonetic?.text && (
+            <Text className="text-lg italic text-blue-600">{selectedPhonetic.text}</Text>
+          )}
 
-        {/* Mostrar el botón de audio si hay un phonetic con audio */}
-        {selectedPhonetic?.audio && (
-          <TouchableOpacity
-            onPress={() => {
-              /* Lógica para reproducir audio */
-            }}>
-            <Text className="text-lg text-blue-500">Play Audio</Text>
-          </TouchableOpacity>
-        )}
+          {selectedPhonetic?.audio && (
+            <TouchableOpacity
+              onPress={() => {
+                /* Lógica para reproducir audio */
+              }}>
+              <Ionicons name="volume-high" size={24} color="#2563eb" />
+            </TouchableOpacity>
+          )}
+        </View>
 
-        <View className="flex-row bg-white">
+        <View className="flex-row pb-5">
           {partOfSpeechTabs.map((partOfSpeech, idx) => (
             <TouchableOpacity
               key={idx}
-              className={`flex-1 border-b-2 p-4 ${activeTab === idx ? 'border-blue-500' : 'border-transparent'}`}
+              className={`flex-1 rounded-lg p-4 ${activeTab === idx ? 'bg-blue-600' : 'bg-transparent'} `}
               onPress={() => setActiveTab(idx)}>
               <Text
-                className={`text-center ${activeTab === idx ? 'font-semibold text-blue-500' : 'text-gray-500'}`}>
+                className={`text-center ${activeTab === idx ? 'font-semibold text-white' : 'text-gray-500'}`}>
                 {partOfSpeech.charAt(0).toUpperCase() + partOfSpeech.slice(1)}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
         <ScrollView className="p-3" contentContainerStyle={{ paddingBottom: 32 }}>
+          <Text className="mb-2 text-lg font-semibold">Definitions</Text>
           {groupedMeanings[partOfSpeechTabs[activeTab]].map((meaning, idx) => (
-            <View key={idx} className="mt-4">
-              <Text className="text-xs">
-                {idx + 1}. {meaning.partOfSpeech}
-              </Text>
+            <View key={idx}>
+              <Text className="text-xs text-[#666]">{meaning.partOfSpeech}</Text>
               {meaning.definitions.map((definition, defIdx) => (
                 <View key={defIdx} className="mb-4 ml-2">
-                  <Text className="mt-1 text-xs italic text-[#666]">{definition.definition}</Text>
+                  <Text className="text-xs text-[#666]">
+                    {defIdx + 1}. {definition.definition}
+                  </Text>
                   {definition.example && (
                     <Text className="mt-1 text-xs italic text-[#666]">
                       Example: {definition.example}
