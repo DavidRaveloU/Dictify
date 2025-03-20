@@ -1,9 +1,38 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Link, Stack, useRouter } from 'expo-router';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+
+import { fetchWordDetails } from './api/dictionary';
+import { fetchRandomWords } from './api/randomWords';
+import { WordDetails } from './types/dictionary';
 
 export default function Home() {
   const router = useRouter();
+  const [randomWordDetails, setRandomWordDetails] = useState<WordDetails[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getRandomWordDetails = async () => {
+      try {
+        const randomWords = await fetchRandomWords(7);
+        const detailsPromises = randomWords.map((word) => fetchWordDetails(word));
+        const details: (WordDetails | null)[] = await Promise.all(detailsPromises);
+
+        const validDetails = details.filter((detail) => detail !== null) as WordDetails[];
+        setRandomWordDetails(validDetails);
+        setError(null);
+      } catch (error) {
+        console.error('Error fetching random words details:', error);
+        setError('Failed to load words. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    getRandomWordDetails();
+  }, []);
 
   return (
     <>
@@ -13,8 +42,7 @@ export default function Home() {
           <Ionicons name="scan" size={24} color="#999" />
         </View>
 
-        {/* Campo de búsqueda */}
-        <Pressable onPress={() => router.push('/search')}>
+        <Pressable className="mb-4" onPress={() => router.push('/search')}>
           <View className="mt-4 w-full flex-row items-center rounded-lg bg-[#E7E7E7] px-4">
             <Ionicons name="search" size={24} color="#999" />
             <TextInput
@@ -26,30 +54,59 @@ export default function Home() {
           </View>
         </Pressable>
 
-        <Link href={{ pathname: '/details', params: { word: 'Run' } }} asChild>
-          <Pressable>
-            {({ pressed }) => (
-              <View
-                className={`center mt-7 flex-row rounded-lg bg-[#FAF6F3] p-7 ${pressed ? 'opacity-50' : ''}`}>
-                <View className="flex-col">
-                  <View className="flex-row items-center gap-2">
-                    <View className="h-7 w-2 bg-[#2563eb]" />
-                    <Text className="text-4xl font-bold">Run</Text>
-                    <Text className="text-[#999]">Verb</Text>
-                  </View>
-                  <View className="flex-row items-center gap-3">
-                    <Text className="text-xl italic text-[#999]">/həˈləʊ/</Text>
-                    <Ionicons name="volume-high" size={24} color="#999" />
-                  </View>
-                  <Text>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elitipsum dolor sit amet,
-                    consectetur adipiscing elit
-                  </Text>
-                </View>
-              </View>
-            )}
-          </Pressable>
-        </Link>
+        {isLoading ? (
+          <View className="mt-7 flex-1 items-center justify-center">
+            <ActivityIndicator size="large" color="#2563eb" />
+          </View>
+        ) : error ? (
+          <View className="mt-7 flex-1 items-center justify-center">
+            <Text className="text-lg text-[#666]">{error}</Text>
+          </View>
+        ) : randomWordDetails.length > 0 ? (
+          <ScrollView>
+            <View>
+              <Text className="my-7 text-2xl font-bold">Discover new words</Text>
+              {randomWordDetails.map((wordDetails, idx) => (
+                <Link
+                  key={idx}
+                  href={{ pathname: '/details', params: { word: wordDetails.word } }}
+                  asChild>
+                  <Pressable>
+                    {({ pressed }) => (
+                      <View
+                        className={`center mb-7 flex-row rounded-lg bg-[#FAF6F3] p-7 ${pressed ? 'opacity-50' : ''}`}>
+                        <View className="flex-col">
+                          <View className="flex-row items-center gap-2">
+                            <View className="h-7 w-2 bg-[#2563eb]" />
+                            <Text className="text-4xl font-bold">
+                              {wordDetails.word.charAt(0).toUpperCase() + wordDetails.word.slice(1)}
+                            </Text>
+                            <Text className="text-[#999]">
+                              {wordDetails.meanings[0]?.partOfSpeech || 'Unknown'}
+                            </Text>
+                          </View>
+                          {wordDetails.phonetics?.[0]?.audio && wordDetails.phonetics?.[0].text && (
+                            <View className="flex-row items-center gap-3">
+                              <Text className="text-xl italic text-[#999]">
+                                {wordDetails.phonetics?.[0]?.text || '/.../'}
+                              </Text>
+                              <Ionicons name="volume-high" size={24} color="#999" />
+                            </View>
+                          )}
+
+                          <Text>
+                            {wordDetails.meanings[0]?.definitions[0]?.definition ||
+                              'No definition available.'}
+                          </Text>
+                        </View>
+                      </View>
+                    )}
+                  </Pressable>
+                </Link>
+              ))}
+            </View>
+          </ScrollView>
+        ) : null}
       </View>
     </>
   );
