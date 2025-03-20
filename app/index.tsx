@@ -1,24 +1,31 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Link, Stack } from 'expo-router';
+import { Link, Stack, useRouter } from 'expo-router';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
 export default function Home() {
+  const router = useRouter();
+
   return (
     <>
       <Stack.Screen options={{ title: 'Home', headerShown: false }} />
       <View className="mx-4 mt-4 flex-1 bg-[#F2F2F2]">
-        <View className="flex-row items-center justify-between">
-          <Text className="text-3xl font-semibold text-[#1F1F1F]">Search</Text>
+        <View className="flex-row items-center justify-end">
           <Ionicons name="scan" size={24} color="#999" />
         </View>
-        <View className="mt-4 w-full flex-row items-center rounded-lg bg-[#E7E7E7] px-4">
-          <Ionicons name="search" size={24} color="#999" />
-          <TextInput
-            className="ml-2 h-14 flex-1 text-[#282C34]"
-            placeholder="Find the meaning..."
-            placeholderTextColor="#999"
-          />
-        </View>
+
+        {/* Campo de búsqueda */}
+        <Pressable onPress={() => router.push('/search')}>
+          <View className="mt-4 w-full flex-row items-center rounded-lg bg-[#E7E7E7] px-4">
+            <Ionicons name="search" size={24} color="#999" />
+            <TextInput
+              className="ml-2 h-14 flex-1 text-[#282C34]"
+              placeholder="Find the meaning..."
+              placeholderTextColor="#999"
+              editable={false}
+            />
+          </View>
+        </Pressable>
+
         <Link href={{ pathname: '/details', params: { word: 'Run' } }} asChild>
           <Pressable>
             {({ pressed }) => (
