@@ -59,16 +59,6 @@ export default function Details() {
     getWordDetails();
   }, [word]);
 
-  if (loading) {
-    return <ActivityIndicator size="large" />;
-  }
-
-  if (!wordDetails) {
-    return <Text>Word not found.</Text>;
-  }
-
-  const partOfSpeechTabs = Object.keys(groupedMeanings);
-
   return (
     <>
       <Stack.Screen
@@ -79,70 +69,77 @@ export default function Details() {
           headerStyle: { backgroundColor: '#f9f9f9' },
         }}
       />
-      <View className="mt-5 flex-1 px-6">
-        <Text className="text-5xl font-semibold text-[#1F1F1F]">
-          {wordDetails.word.charAt(0).toUpperCase() + wordDetails.word.slice(1)}
-        </Text>
-        <View className="mb-3 flex-row items-center gap-2">
-          {selectedPhonetic?.text && (
-            <Text className="text-lg italic text-blue-600">{selectedPhonetic.text}</Text>
-          )}
+      {loading ? (
+        <ActivityIndicator size="large" />
+      ) : !wordDetails ? (
+        <Text>Word not found.</Text>
+      ) : (
+        <View className="mt-5 flex-1 px-6">
+          <Text className="text-5xl font-semibold text-[#1F1F1F]">
+            {wordDetails.word.charAt(0).toUpperCase() + wordDetails.word.slice(1)}
+          </Text>
+          <View className="mb-3 flex-row items-center gap-2">
+            {selectedPhonetic?.text && (
+              <Text className="text-lg italic text-blue-600">{selectedPhonetic.text}</Text>
+            )}
 
-          {selectedPhonetic?.audio && (
-            <TouchableOpacity
-              onPress={() => {
-                /* Lógica para reproducir audio */
-              }}>
-              <Ionicons name="volume-high" size={24} color="#2563eb" />
-            </TouchableOpacity>
-          )}
-        </View>
-
-        <View className="flex-row pb-5">
-          {partOfSpeechTabs.map((partOfSpeech, idx) => (
-            <TouchableOpacity
-              key={idx}
-              className={`flex-1 rounded-lg p-4 ${activeTab === idx ? 'bg-blue-600' : 'bg-transparent'} `}
-              onPress={() => setActiveTab(idx)}>
-              <Text
-                className={`text-center ${activeTab === idx ? 'font-semibold text-white' : 'text-gray-500'}`}>
-                {partOfSpeech.charAt(0).toUpperCase() + partOfSpeech.slice(1)}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-        <ScrollView className="p-3" contentContainerStyle={{ paddingBottom: 32 }}>
-          <Text className="mb-2 text-lg font-semibold">Definitions</Text>
-          {groupedMeanings[partOfSpeechTabs[activeTab]].map((meaning, idx) => (
-            <View key={idx}>
-              <Text className="text-xs text-[#666]">{meaning.partOfSpeech}</Text>
-              {meaning.definitions.map((definition, defIdx) => (
-                <View key={defIdx} className="mb-4 ml-2">
-                  <Text className="text-xs text-[#666]">
-                    {defIdx + 1}. {definition.definition}
+            {selectedPhonetic?.audio && (
+              <TouchableOpacity
+                onPress={() => {
+                  /* Lógica para reproducir audio */
+                }}>
+                <Ionicons name="volume-high" size={24} color="#2563eb" />
+              </TouchableOpacity>
+            )}
+          </View>
+          {Object.keys(groupedMeanings).length > 1 && (
+            <View className="flex-row pb-5">
+              {Object.keys(groupedMeanings).map((partOfSpeech, idx) => (
+                <TouchableOpacity
+                  key={idx}
+                  className={`flex-1 rounded-lg p-4 ${activeTab === idx ? 'bg-blue-600' : 'bg-transparent'} `}
+                  onPress={() => setActiveTab(idx)}>
+                  <Text
+                    className={`text-center ${activeTab === idx ? 'font-semibold text-white' : 'text-gray-500'}`}>
+                    {partOfSpeech.charAt(0).toUpperCase() + partOfSpeech.slice(1)}
                   </Text>
-                  {definition.example && (
-                    <Text className="mt-1 text-xs italic text-[#666]">
-                      Example: {definition.example}
-                    </Text>
-                  )}
-
-                  {definition.synonyms && definition.synonyms.length > 0 && (
-                    <Text className="mt-1 text-[#888]">
-                      Synonyms: {definition.synonyms.join(', ')}
-                    </Text>
-                  )}
-                  {definition.antonyms && definition.antonyms.length > 0 && (
-                    <Text className="mt-1 text-[#888]">
-                      Synonyms: {definition.antonyms.join(', ')}
-                    </Text>
-                  )}
-                </View>
+                </TouchableOpacity>
               ))}
             </View>
-          ))}
-        </ScrollView>
-      </View>
+          )}
+          <ScrollView className="p-3" contentContainerStyle={{ paddingBottom: 32 }}>
+            <Text className="mb-2 text-lg font-semibold">Definitions</Text>
+            {groupedMeanings[Object.keys(groupedMeanings)[activeTab]].map((meaning, idx) => (
+              <View key={idx}>
+                <Text className="text-xs text-[#666]">{meaning.partOfSpeech}</Text>
+                {meaning.definitions.map((definition, defIdx) => (
+                  <View key={defIdx} className="mb-4 ml-2">
+                    <Text className="text-xs text-[#666]">
+                      {defIdx + 1}. {definition.definition}
+                    </Text>
+                    {definition.example && (
+                      <Text className="mt-1 text-xs italic text-[#666]">
+                        Example: {definition.example}
+                      </Text>
+                    )}
+
+                    {definition.synonyms && definition.synonyms.length > 0 && (
+                      <Text className="mt-1 text-[#888]">
+                        Synonyms: {definition.synonyms.join(', ')}
+                      </Text>
+                    )}
+                    {definition.antonyms && definition.antonyms.length > 0 && (
+                      <Text className="mt-1 text-[#888]">
+                        Antonyms: {definition.antonyms.join(', ')}
+                      </Text>
+                    )}
+                  </View>
+                ))}
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+      )}
     </>
   );
 }
