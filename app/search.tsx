@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stack, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Keyboard,
   Pressable,
@@ -14,11 +15,36 @@ import {
 export default function Search() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
 
-  const searchHistory = ['Run', 'Walk', 'Jump', 'Play', 'Sing'];
+  useEffect(() => {
+    const loadSearchHistory = async () => {
+      try {
+        const history = await AsyncStorage.getItem('searchHistory');
+        if (history) {
+          setSearchHistory(JSON.parse(history));
+        }
+      } catch (error) {
+        console.error('Error loading search history:', error);
+      }
+    };
+    loadSearchHistory();
+  }, []);
+
+  const saveSearchHistory = async (word: string) => {
+    try {
+      const updateHistory = [word, ...searchHistory.filter((item) => item !== word)];
+      const limitedHistory = updateHistory.slice(0, 10);
+      setSearchHistory(limitedHistory);
+      await AsyncStorage.setItem('searchHistory', JSON.stringify(limitedHistory));
+    } catch (error) {
+      console.error('Error saving search history:', error);
+    }
+  };
 
   const handleSearch = () => {
     if (searchQuery.trim() !== '') {
+      saveSearchHistory(searchQuery.trim());
       router.push(`/details?word=${searchQuery}`);
       Keyboard.dismiss();
     } else {
@@ -29,6 +55,12 @@ export default function Search() {
     if (event.nativeEvent.key === 'Enter') {
       handleSearch();
     }
+  };
+
+  const handleDelete = async (word: string) => {
+    const updateHistory = searchHistory.filter((item) => item !== word);
+    setSearchHistory(updateHistory);
+    await AsyncStorage.setItem('searchHistory', JSON.stringify(updateHistory));
   };
 
   return (
@@ -56,13 +88,19 @@ export default function Search() {
         </View>
         {searchQuery.trim() === '' ? (
           <View className="mt-4">
-            <Text>Reciente Searches</Text>
+            <Text>Recent Searches</Text>
             <ScrollView className="mt-2">
               {searchHistory.map((word, index) => (
                 <Pressable key={index} onPress={() => router.push(`/details?word=${word}`)}>
                   {({ pressed }) => (
-                    <View className={`p-4 ${pressed ? 'bg-gray-200' : 'bg-white'}`}>
+                    <View
+                      className={`flex-row justify-between p-4 ${pressed ? 'bg-gray-200' : 'bg-white'}`}>
                       <Text className="text-[#1F1F1F]">{word}</Text>
+                      <Pressable key={index} onPress={() => handleDelete(word)}>
+                        {({ pressed }) => (
+                          <Ionicons name="close" size={24} color={pressed ? '#2563eb' : '#999'} />
+                        )}
+                      </Pressable>
                     </View>
                   )}
                 </Pressable>
