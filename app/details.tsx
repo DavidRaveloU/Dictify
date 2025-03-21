@@ -74,7 +74,9 @@ export default function Details() {
           <ActivityIndicator size="large" color="#2563eb" />
         </View>
       ) : !wordDetails ? (
-        <Text>Word not found.</Text>
+        <View className="mt-7 flex-1 items-center justify-center">
+          <Text>Word not found.</Text>
+        </View>
       ) : (
         <View className="mt-5 flex-1 px-6">
           <Text className="text-5xl font-semibold text-[#1F1F1F]">
