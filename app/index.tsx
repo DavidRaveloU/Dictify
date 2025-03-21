@@ -86,18 +86,23 @@ export default function Home() {
                             </Text>
                           </View>
                           {wordDetails.phonetics?.[0]?.audio && wordDetails.phonetics?.[0].text && (
-                            <View className="flex-row items-center gap-3">
-                              <Text className="text-xl italic text-[#999]">
-                                {wordDetails.phonetics?.[0]?.text || '/.../'}
-                              </Text>
-                              <Ionicons name="volume-high" size={24} color="#999" />
-                            </View>
+                            <Text className="py-1 text-[1.2rem] italic text-[#999]">
+                              {wordDetails.phonetics?.[0]?.text || '/.../'}
+                            </Text>
                           )}
-
                           <Text>
                             {wordDetails.meanings[0]?.definitions[0]?.definition ||
                               'No definition available.'}
                           </Text>
+                          {wordDetails.meanings?.[0]?.definitions?.[0]?.example && (
+                            <Text className="mt-2 italic text-[#666]">
+                              Example:{' '}
+                              {wordDetails.meanings?.[0]?.definitions?.[0]?.example
+                                .charAt(0)
+                                .toUpperCase() +
+                                wordDetails.meanings?.[0]?.definitions?.[0]?.example.slice(1)}
+                            </Text>
+                          )}
                         </View>
                       </View>
                     )}
