@@ -48,12 +48,6 @@ export default function Search() {
     }
   };
 
-  const handleKeyPress = (event: any) => {
-    if (event.nativeEvent.key === 'Enter') {
-      handleSearch();
-    }
-  };
-
   const handleDelete = async (word: string) => {
     const updateHistory = searchHistory.filter((item) => item !== word);
     setSearchHistory(updateHistory);
@@ -84,7 +78,7 @@ export default function Search() {
             placeholderTextColor="#999"
             value={searchQuery}
             onChangeText={setSearchQuery}
-            onKeyPress={handleKeyPress}
+            onSubmitEditing={handleSearch}
             autoFocus
           />
         </View>
