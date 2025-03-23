@@ -2,15 +2,9 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stack, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import {
-  Keyboard,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Keyboard, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+
+import HistoryItem from '~/components/HistoryItem';
 
 export default function Search() {
   const router = useRouter();
@@ -105,24 +99,15 @@ export default function Search() {
             <ScrollView className="mt-2">
               {searchHistory.length > 0 ? (
                 searchHistory.map((word, index) => (
-                  <Pressable
+                  <HistoryItem
                     key={index}
+                    word={word}
                     onPress={() => {
                       saveSearchHistory(word);
                       router.push(`/details?word=${word}`);
-                    }}>
-                    {({ pressed }) => (
-                      <View
-                        className={`mb-3 flex-row items-center justify-between p-3 ${pressed ? 'bg-gray-200' : 'bg-white'}`}>
-                        <Text className="text-[#1F1F1F]">{word}</Text>
-                        <Pressable key={index} onPress={() => handleDelete(word)}>
-                          {({ pressed }) => (
-                            <Ionicons name="close" size={28} color={pressed ? '#2563eb' : '#999'} />
-                          )}
-                        </Pressable>
-                      </View>
-                    )}
-                  </Pressable>
+                    }}
+                    onDelete={() => handleDelete(word)}
+                  />
                 ))
               ) : (
                 <Text className="text-[#999]">No recent searches</Text>
