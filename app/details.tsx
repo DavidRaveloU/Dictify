@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { Audio } from 'expo-av';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
@@ -18,6 +19,15 @@ export default function Details() {
     text?: string;
     audio?: string;
   } | null>(null);
+
+  const playSound = async (audioUrl: string) => {
+    try {
+      const { sound } = await Audio.Sound.createAsync({ uri: audioUrl });
+      await sound.playAsync();
+    } catch (error) {
+      console.error('Error playing sound:', error);
+    }
+  };
 
   useEffect(() => {
     const getWordDetails = async () => {
@@ -88,7 +98,11 @@ export default function Details() {
                 <Text className="text-lg italic text-blue-600">{selectedPhonetic.text}</Text>
                 <TouchableOpacity
                   onPress={() => {
-                    /* Lógica para reproducir audio */
+                    console.log('Play audio');
+                    if (selectedPhonetic.audio) {
+                      console.log('selectedPhonetic.audio:', selectedPhonetic.audio);
+                      playSound(selectedPhonetic.audio);
+                    }
                   }}>
                   <Ionicons name="volume-high" size={24} color="#2563eb" />
                 </TouchableOpacity>
@@ -127,14 +141,13 @@ export default function Details() {
                         Example: {definition.example}
                       </Text>
                     )}
-
                     {definition.synonyms && definition.synonyms.length > 0 && (
-                      <Text className="mt-1 text-[#888]">
+                      <Text className="mt-1 text-xs text-[#888]">
                         Synonyms: {definition.synonyms.join(', ')}
                       </Text>
                     )}
                     {definition.antonyms && definition.antonyms.length > 0 && (
-                      <Text className="mt-1 text-[#888]">
+                      <Text className="mt-1 text-xs text-[#888]">
                         Antonyms: {definition.antonyms.join(', ')}
                       </Text>
                     )}
