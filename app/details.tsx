@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import { fetchWordDetails } from './api/dictionary';
 import { Meaning, WordDetails } from './types/dictionary';
+
+import LoadingIndicator from '~/components/LoadingIndicator';
 
 export default function Details() {
   const { word } = useLocalSearchParams<{ word: string }>();
@@ -70,9 +72,7 @@ export default function Details() {
         }}
       />
       {loading ? (
-        <View className="mt-7 flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#2563eb" />
-        </View>
+        <LoadingIndicator />
       ) : !wordDetails ? (
         <View className="mt-7 flex-1 items-center justify-center">
           <Text>Word not found.</Text>
@@ -83,25 +83,26 @@ export default function Details() {
             {wordDetails.word.charAt(0).toUpperCase() + wordDetails.word.slice(1)}
           </Text>
           <View className="mb-3 flex-row items-center gap-2">
-            {selectedPhonetic?.text && (
-              <Text className="text-lg italic text-blue-600">{selectedPhonetic.text}</Text>
-            )}
-
-            {selectedPhonetic?.audio && (
-              <TouchableOpacity
-                onPress={() => {
-                  /* Lógica para reproducir audio */
-                }}>
-                <Ionicons name="volume-high" size={24} color="#2563eb" />
-              </TouchableOpacity>
+            {selectedPhonetic?.text && selectedPhonetic?.audio ? (
+              <View className="flex-row items-center gap-2">
+                <Text className="text-lg italic text-blue-600">{selectedPhonetic.text}</Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    /* Lógica para reproducir audio */
+                  }}>
+                  <Ionicons name="volume-high" size={24} color="#2563eb" />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View className="mt-3" />
             )}
           </View>
           {Object.keys(groupedMeanings).length > 1 && (
-            <View className="flex-row pb-5">
+            <View className="flex-row gap-3 pb-5">
               {Object.keys(groupedMeanings).map((partOfSpeech, idx) => (
                 <TouchableOpacity
                   key={idx}
-                  className={`flex-1 rounded-lg p-4 ${activeTab === idx ? 'bg-blue-600' : 'bg-transparent'} `}
+                  className={`flex-1  rounded-lg border-2 border-dashed border-blue-600/40 p-4 ${activeTab === idx ? 'border-transparent bg-blue-600' : 'bg-transparent'} `}
                   onPress={() => setActiveTab(idx)}>
                   <Text
                     className={`text-center ${activeTab === idx ? 'font-semibold text-white' : 'text-gray-500'}`}>
