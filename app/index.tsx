@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { RefreshControl, ScrollView, Text, View } from 'react-native';
 
 import { fetchWordDetails } from './api/dictionary';
 import { fetchRandomWords } from './api/randomWords';
@@ -16,27 +16,34 @@ export default function Home() {
   const [randomWordDetails, setRandomWordDetails] = useState<WordDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadRandomWordsDetails = async () => {
+    try {
+      const randomWords = await fetchRandomWords(12);
+      const detailsPromises = randomWords.map((word) => fetchWordDetails(word));
+      const details: (WordDetails | null)[] = await Promise.all(detailsPromises);
+
+      const validDetails = details.filter((detail) => detail !== null) as WordDetails[];
+      setRandomWordDetails(validDetails);
+      setError(null);
+    } catch (error) {
+      console.error('Error fetching random words details:', error);
+      setError('Failed to load words. Please try again later.');
+    } finally {
+      setIsLoading(false);
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    const getRandomWordDetails = async () => {
-      try {
-        const randomWords = await fetchRandomWords(12);
-        console.log('randomWords:', randomWords);
-        const detailsPromises = randomWords.map((word) => fetchWordDetails(word));
-        const details: (WordDetails | null)[] = await Promise.all(detailsPromises);
-
-        const validDetails = details.filter((detail) => detail !== null) as WordDetails[];
-        setRandomWordDetails(validDetails);
-        setError(null);
-      } catch (error) {
-        console.error('Error fetching random words details:', error);
-        setError('Failed to load words. Please try again later.');
-      }
-      setIsLoading(false);
-    };
-
-    getRandomWordDetails();
+    loadRandomWordsDetails();
   }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    loadRandomWordsDetails();
+  };
 
   return (
     <>
@@ -53,7 +60,10 @@ export default function Home() {
             <Text className="text-lg text-[#666]">{error}</Text>
           </View>
         ) : randomWordDetails.length > 0 ? (
-          <ScrollView>
+          <ScrollView
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#2563eb']} />
+            }>
             <View>
               <Text className="my-7 text-2xl font-bold">Discover new words</Text>
               {randomWordDetails.map((wordDetails, idx) => (
