@@ -25,7 +25,7 @@ export default function WordCard({ wordDetails }: WordCardProps) {
                   {wordDetails.meanings[0]?.partOfSpeech || 'No part of speech available.'}
                 </Text>
               </View>
-              {wordDetails.phonetics?.[0]?.audio && wordDetails.phonetics?.[0].text && (
+              {wordDetails.phonetics?.[0]?.text && (
                 <Text className="py-1 text-[1.2rem] italic text-[#999]">
                   {wordDetails.phonetics?.[0]?.text}
                 </Text>

@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Stack, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Keyboard, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import HistoryItem from '~/components/HistoryItem';
+import StackScreen from '~/components/StackScreen';
 
 export default function Search() {
   const router = useRouter();
@@ -61,14 +62,7 @@ export default function Search() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: 'Search',
-          headerShown: true,
-          headerTintColor: '#2563eb',
-          headerStyle: { backgroundColor: '#f9f9f9' },
-        }}
-      />
+      <StackScreen title="Search" />
       <View className="mx-4 mt-4">
         <View className="w-full flex-row items-center rounded-lg bg-[#E7E7E7] px-4">
           <Ionicons name="search" size={24} color="#999" />
