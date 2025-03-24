@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
@@ -8,6 +8,7 @@ import { fetchWordDetails } from './api/dictionary';
 import { Meaning, WordDetails } from './types/dictionary';
 
 import LoadingIndicator from '~/components/LoadingIndicator';
+import StackScreen from '~/components/StackScreen';
 
 export default function Details() {
   const { word } = useLocalSearchParams<{ word: string }>();
@@ -20,10 +21,20 @@ export default function Details() {
     audio?: string;
   } | null>(null);
 
+  const [isPLaying, setIsPlaying] = useState(false);
+
   const playSound = async (audioUrl: string) => {
+    if (isPLaying) return;
+
     try {
-      const { sound } = await Audio.Sound.createAsync({ uri: audioUrl });
-      await sound.playAsync();
+      setIsPlaying(true);
+      const { sound } = await Audio.Sound.createAsync({ uri: audioUrl }, { shouldPlay: true });
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.isLoaded && status.didJustFinish) {
+          setIsPlaying(false);
+          sound.unloadAsync();
+        }
+      });
     } catch (error) {
       console.error('Error playing sound:', error);
     }
@@ -73,14 +84,7 @@ export default function Details() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: 'Back',
-          headerShown: true,
-          headerTintColor: '#2563eb',
-          headerStyle: { backgroundColor: '#f9f9f9' },
-        }}
-      />
+      <StackScreen />
       {loading ? (
         <LoadingIndicator />
       ) : !wordDetails ? (
@@ -93,19 +97,19 @@ export default function Details() {
             {wordDetails.word.charAt(0).toUpperCase() + wordDetails.word.slice(1)}
           </Text>
           <View className="mb-3 flex-row items-center gap-2">
-            {selectedPhonetic?.text && selectedPhonetic?.audio ? (
+            {selectedPhonetic?.text ? (
               <View className="flex-row items-center gap-2">
                 <Text className="text-lg italic text-blue-600">{selectedPhonetic.text}</Text>
-                <TouchableOpacity
-                  onPress={() => {
-                    console.log('Play audio');
-                    if (selectedPhonetic.audio) {
-                      console.log('selectedPhonetic.audio:', selectedPhonetic.audio);
-                      playSound(selectedPhonetic.audio);
-                    }
-                  }}>
-                  <Ionicons name="volume-high" size={24} color="#2563eb" />
-                </TouchableOpacity>
+                {selectedPhonetic.audio && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      if (selectedPhonetic.audio) {
+                        playSound(selectedPhonetic.audio);
+                      }
+                    }}>
+                    <Ionicons name="volume-high" size={24} color="#2563eb" />
+                  </TouchableOpacity>
+                )}
               </View>
             ) : (
               <View className="mt-3" />
