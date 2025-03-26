@@ -8,7 +8,6 @@ interface WordCardProps {
 }
 
 export default function WordCard({ wordDetails }: WordCardProps) {
-  console.log('wordDetails:', wordDetails);
   return (
     <Link href={{ pathname: '/details', params: { word: wordDetails.word } }} asChild>
       <Pressable>
