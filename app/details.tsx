@@ -7,6 +7,7 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { fetchWordDetails } from './api/dictionary';
 import { Meaning, WordDetails } from './types/dictionary';
 
+import DefinitionItem from '~/components/DefinitionItem';
 import LoadingIndicator from '~/components/LoadingIndicator';
 import StackScreen from '~/components/StackScreen';
 
@@ -134,28 +135,9 @@ export default function Details() {
             <Text className="mb-2 text-lg font-semibold">Definitions</Text>
             {groupedMeanings[Object.keys(groupedMeanings)[activeTab]].map((meaning, idx) => (
               <View key={idx}>
-                <Text className="text-xs text-[#666]">{meaning.partOfSpeech}</Text>
+                <Text className="mb-4 text-xs text-[#666]">{meaning.partOfSpeech}</Text>
                 {meaning.definitions.map((definition, defIdx) => (
-                  <View key={defIdx} className="mb-4 ml-2">
-                    <Text className="text-xs text-[#666]">
-                      {defIdx + 1}. {definition.definition}
-                    </Text>
-                    {definition.example && (
-                      <Text className="mt-1 text-xs italic text-[#666]">
-                        Example: {definition.example}
-                      </Text>
-                    )}
-                    {definition.synonyms && definition.synonyms.length > 0 && (
-                      <Text className="mt-1 text-xs text-[#888]">
-                        Synonyms: {definition.synonyms.join(', ')}
-                      </Text>
-                    )}
-                    {definition.antonyms && definition.antonyms.length > 0 && (
-                      <Text className="mt-1 text-xs text-[#888]">
-                        Antonyms: {definition.antonyms.join(', ')}
-                      </Text>
-                    )}
-                  </View>
+                  <DefinitionItem key={defIdx} definition={definition} defIdx={defIdx} />
                 ))}
               </View>
             ))}
