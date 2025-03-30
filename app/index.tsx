@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 import { Stack, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { RefreshControl, ScrollView, Text, View } from 'react-native';
@@ -48,10 +48,9 @@ export default function Home() {
   return (
     <>
       <Stack.Screen options={{ title: 'Home', headerShown: false }} />
-      <View className="mx-4 mt-4 flex-1 bg-[#F2F2F2]">
-        <View className="flex-row items-center justify-end">
-          <Ionicons name="scan" size={24} color="#999" />
-        </View>
+      <View
+        style={{ paddingTop: Constants.statusBarHeight }}
+        className="mx-4 mt-4 flex-1 bg-[#F2F2F2]">
         <SearchBar value="" onChange={() => {}} onPress={() => router.push('/search')} />
         {isLoading ? (
           <LoadingIndicator />
